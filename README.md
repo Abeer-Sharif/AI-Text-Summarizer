@@ -148,9 +148,6 @@ AI-Text-Summarizer/
 │
 ├── app.py
 ├── index.html
-├── style.css
-├── script.js
-├── requirements.txt
 ├── .gitignore
 └── README.md
 ```
