@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>AI Text Summarizer</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f4f6f8;
+            color: #1f2937;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 900px;
+            margin: auto;
+            padding: 50px 0;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 35px;
+        }
+
+        header h1 {
+            font-size: 38px;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            color: #6b7280;
+            font-size: 16px;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        label {
+            display: block;
+            font-size: 17px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 280px;
+            resize: vertical;
+            padding: 15px;
+
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+
+            font-size: 15px;
+            font-family: inherit;
+
+            outline: none;
+        }
+
+        textarea:focus {
+            border-color: #2563eb;
+        }
+
+        .bottom-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            margin-top: 15px;
+        }
+
+        #character-count {
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        button {
+            border: none;
+            border-radius: 8px;
+
+            padding: 12px 24px;
+
+            font-size: 15px;
+            font-weight: 600;
+
+            cursor: pointer;
+
+            background: #2563eb;
+            color: white;
+        }
+
+        button:hover {
+            background: #1d4ed8;
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            margin-bottom: 15px;
+        }
+
+        .result-header h2 {
+            font-size: 22px;
+        }
+
+        #copy-btn {
+            background: #374151;
+            padding: 8px 15px;
+            font-size: 13px;
+        }
+
+        #copy-btn:hover {
+            background: #111827;
+        }
+
+        .summary {
+            min-height: 120px;
+
+            padding: 18px;
+
+            background: #f9fafb;
+
+            border-radius: 8px;
+
+            line-height: 1.7;
+
+            color: #374151;
+        }
+
+        .loading {
+            padding: 20px;
+
+            text-align: center;
+
+            color: #2563eb;
+
+            font-weight: 600;
+        }
+
+        .error {
+            margin-top: 15px;
+
+            padding: 12px;
+
+            border-radius: 8px;
+
+            background: #fee2e2;
+
+            color: #b91c1c;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        footer {
+            text-align: center;
+
+            color: #9ca3af;
+
+            font-size: 13px;
+
+            margin-top: 30px;
+        }
+
+        @media (max-width: 600px) {
+
+            .container {
+                width: 95%;
+                padding: 30px 0;
+            }
+
+            header h1 {
+                font-size: 28px;
+            }
+
+            .bottom-row {
+                flex-direction: column;
+
+                align-items: stretch;
+
+                gap: 12px;
+            }
+
+            button {
+                width: 100%;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+    <div class="container">
+
+
+        <!-- Header -->
+
+        <header>
+
+            <h1>AI Text Summarizer</h1>
+
+            <p>
+                Summarize dialogues using a T5 Transformer model
+            </p>
+
+        </header>
+
+
+        <!-- Input -->
+
+        <div class="card">
+
+            <label for="dialogue">
+                Enter Dialogue
+            </label>
+
+            <textarea
+                id="dialogue"
+                placeholder="Enter your dialogue here..."
+                maxlength="10000"
+            ></textarea>
+
+
+            <div class="bottom-row">
+
+                <span id="character-count">
+                    0 characters
+                </span>
+
+                <button id="summarize-btn">
+                    Summarize
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <!-- Result -->
+
+        <div class="card">
+
+            <div class="result-header">
+
+                <h2>
+                    Summary
+                </h2>
+
+                <button id="copy-btn">
+                    Copy
+                </button>
+
+            </div>
+
+
+            <!-- Loading -->
+
+            <div
+                id="loading"
+                class="loading hidden"
+            >
+                Generating summary...
+            </div>
+
+
+            <!-- Summary -->
+
+            <div
+                id="summary"
+                class="summary"
+            >
+                Your generated summary will appear here.
+            </div>
+
+
+            <!-- Error -->
+
+            <div
+                id="error"
+                class="error hidden"
+            ></div>
+
+        </div>
+
+
+        <footer>
+
+            <p>
+                Powered by T5 + FastAPI
+            </p>
+
+        </footer>
+
+
+    </div>
+
+
+    <script>
+
+        // Get HTML elements
+
+        const dialogueInput =
+            document.getElementById("dialogue");
+
+        const summarizeButton =
+            document.getElementById("summarize-btn");
+
+        const summaryBox =
+            document.getElementById("summary");
+
+        const loading =
+            document.getElementById("loading");
+
+        const errorBox =
+            document.getElementById("error");
+
+        const characterCount =
+            document.getElementById("character-count");
+
+        const copyButton =
+            document.getElementById("copy-btn");
+
+
+        // Character counter
+
+        dialogueInput.addEventListener(
+            "input",
+            () => {
+
+                const count =
+                    dialogueInput.value.length;
+
+                characterCount.textContent =
+                    `${count} characters`;
+
+            }
+        );
+
+
+        // Summarize button
+
+        summarizeButton.addEventListener(
+            "click",
+            async () => {
+
+                const dialogue =
+                    dialogueInput.value.trim();
+
+
+                // Check empty input
+
+                if (!dialogue) {
+
+                    showError(
+                        "Please enter some dialogue first."
+                    );
+
+                    return;
+                }
+
+
+                hideError();
+
+
+                // Show loading
+
+                summarizeButton.disabled = true;
+
+                loading.classList.remove("hidden");
+
+                summaryBox.textContent = "";
+
+
+                try {
+
+                    // Send POST request to FastAPI
+
+                    const response =
+                        await fetch(
+                            "/summarize/",
+                            {
+                                method: "POST",
+
+                                headers: {
+                                    "Content-Type":
+                                        "application/json"
+                                },
+
+                                body: JSON.stringify({
+                                    dialogue: dialogue
+                                })
+                            }
+                        );
+
+
+                    // Check response
+
+                    if (!response.ok) {
+
+                        throw new Error(
+                            "Failed to generate summary."
+                        );
+
+                    }
+
+
+                    // Convert response to JSON
+
+                    const data =
+                        await response.json();
+
+
+                    // Display summary
+
+                    summaryBox.textContent =
+                        data.summary;
+
+
+                } catch (error) {
+
+                    console.error(error);
+
+                    showError(
+                        "Something went wrong while generating the summary."
+                    );
+
+
+                } finally {
+
+                    // Hide loading
+
+                    summarizeButton.disabled = false;
+
+                    loading.classList.add("hidden");
+
+                }
+
+            }
+        );
+
+
+        // Copy summary
+
+        copyButton.addEventListener(
+            "click",
+            async () => {
+
+                const summary =
+                    summaryBox.textContent.trim();
+
+
+                if (!summary) {
+                    return;
+                }
+
+
+                try {
+
+                    await navigator.clipboard
+                        .writeText(summary);
+
+
+                    copyButton.textContent =
+                        "Copied!";
+
+
+                    setTimeout(
+                        () => {
+
+                            copyButton.textContent =
+                                "Copy";
+
+                        },
+                        1500
+                    );
+
+
+                } catch (error) {
+
+                    console.error(
+                        "Copy failed:",
+                        error
+                    );
+
+                }
+
+            }
+        );
+
+
+        // Show error
+
+        function showError(message) {
+
+            errorBox.textContent = message;
+
+            errorBox.classList.remove(
+                "hidden"
+            );
+
+        }
+
+
+        // Hide error
+
+        function hideError() {
+
+            errorBox.textContent = "";
+
+            errorBox.classList.add(
+                "hidden"
+            );
+
+        }
+
+    </script>
+
+</body>
+
+</html>

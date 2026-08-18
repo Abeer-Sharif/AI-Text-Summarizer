@@ -1,0 +1,96 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+
+# Virtual environments
+venv/
+env/
+.venv/
+ENV/
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Trained / downloaded ML models
+saved_summary_model/
+models/
+*.safetensors
+*.bin
+*.pt
+*.pth
+*.ckpt
+*.onnx
+saved_summary_model/
+*.safetensors
+
+# Hugging Face cache
+.cache/
+huggingface/
+huggingface_cache/
+transformers_cache/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# Testing / coverage
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+
+# Python build files
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Flask
+instance/
+.webassets-cache/
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Frontend build
+frontend/dist/
+frontend/build/
+
+# Local data / datasets
+*.csv
+*.parquet
+*.pickle
+*.pkl
+
+# Miscellaneous
+local/
+tmp/
+temp/
